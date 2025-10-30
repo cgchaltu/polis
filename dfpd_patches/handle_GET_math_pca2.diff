@@ -1,0 +1,377 @@
+--- server/src/routes/math.ts
++++ server/src/server.ts
+@@ -1,94 +1,94 @@
+-function handle_GET_math_pca2(
+
+-  req: { p: { zid: any; math_tick: any; ifNoneMatch: any } },
+
+-  res: {
+
+-    status: (
+
+-      arg0: number
+
+-    ) => { (): any; new (): any; end: { (): void; new (): any } };
+
+-    set: (arg0: {
+
+-      "Content-Type": string;
+
+-      "Content-Encoding": string;
+
+-      Etag: string;
+
+-    }) => void;
+
+-    send: (arg0: any) => void;
+
++  function handle_GET_math_pca2(
+
++    req: { p: { zid: any; math_tick: any; ifNoneMatch: any } },
+
++    res: {
+
++      status: (
+
++        arg0: number
+
++      ) => { (): any; new (): any; end: { (): void; new (): any } };
+
++      set: (arg0: {
+
++        "Content-Type": string;
+
++        "Content-Encoding": string;
+
++        Etag: string;
+
++      }) => void;
+
++      send: (arg0: any) => void;
+
++    }
+
++  ) {
+
++    let zid = req.p.zid;
+
++    let math_tick = req.p.math_tick;
+
++
+
++    let ifNoneMatch = req.p.ifNoneMatch;
+
++    if (ifNoneMatch) {
+
++      if (!_.isUndefined(math_tick)) {
+
++        return fail(
+
++          res,
+
++          400,
+
++          "Expected either math_tick param or If-Not-Match header, but not both."
+
++        );
+
++      }
+
++      if (ifNoneMatch.includes("*")) {
+
++        math_tick = 0;
+
++      } else {
+
++        let entries = ifNoneMatch.split(/ *, */).map((x: string) => {
+
++          return Number(
+
++            x
+
++              .replace(/^[wW]\//, "")
+
++              .replace(/^"/, "")
+
++              .replace(/"$/, "")
+
++          );
+
++        });
+
++        math_tick = _.min(entries); // supporting multiple values for the ifNoneMatch header doesn't really make sense, so I've arbitrarily chosen _.min to decide on one.
+
++      }
+
++    } else if (_.isUndefined(math_tick)) {
+
++      math_tick = -1;
+
++    }
+
++    function finishWith304or404() {
+
++      // Element implicitly has an 'any' type
+
++      // because expression of type 'any' can't be used to index type '{ } '.ts(7053)
+
++      // @ts-ignore
+
++      if (pcaResultsExistForZid[zid]) {
+
++        res.status(304).end();
+
++      } else {
+
++        // Technically, this should probably be a 404, but
+
++        // the red errors make it hard to see other errors
+
++        // in Chrome Developer Tools.
+
++        res.status(304).end();
+
++        // res.status(404).end();
+
++      }
+
++    }
+
++
+
++    getPca(zid, math_tick)
+
++      .then(function (data: PcaCacheItem | undefined) {
+
++        if (data) {
+
++          // The buffer is gzipped beforehand to cut down on server effort in re-gzipping the same json string for each response.
+
++          // We can't cache this endpoint on Cloudflare because the response changes too freqently, so it seems like the best way
+
++          // is to cache the gzipped json'd buffer here on the server.
+
++          res.set({
+
++            "Content-Type": "application/json",
+
++            "Content-Encoding": "gzip",
+
++            Etag: '"' + data.asPOJO.math_tick + '"',
+
++          });
+
++          res.send(data.asBufferOfGzippedJson);
+
++        } else {
+
++          // check whether we should return a 304 or a 404
+
++          // Element implicitly has an 'any' type
+
++          // because expression of type 'any' can't be used to index type '{ } '.ts(7053)
+
++          // @ts-ignore
+
++          if (_.isUndefined(pcaResultsExistForZid[zid])) {
+
++            // This server doesn't know yet if there are any PCA results in the DB
+
++            // So try querying from -1
+
++            return getPca(zid, -1).then(function (data: any) {
+
++              let exists = !!data;
+
++              // Element implicitly has an 'any' type
+
++              // because expression of type 'any' can't be used to index type '{ } '.ts(7053)
+
++              // @ts-ignore
+
++              pcaResultsExistForZid[zid] = exists;
+
++              finishWith304or404();
+
++            });
+
++          } else {
+
++            finishWith304or404();
+
++          }
+
++        }
+
++      })
+
++      .catch(function (err: any) {
+
++        fail(res, 500, err);
+
++      });
+
+   }
+
+-) {
+
+-  let zid = req.p.zid;
+
+-  let math_tick = req.p.math_tick;
+
+-
+
+-  let ifNoneMatch = req.p.ifNoneMatch;
+
+-  if (ifNoneMatch) {
+
+-    if (math_tick !== undefined) {
+
+-      return fail(
+
+-        res,
+
+-        400,
+
+-        "Expected either math_tick param or If-Not-Match header, but not both."
+
+-      );
+
+-    }
+
+-    if (ifNoneMatch.includes("*")) {
+
+-      math_tick = 0;
+
+-    } else {
+
+-      let entries = ifNoneMatch.split(/ *, */).map((x: string) => {
+
+-        return Number(
+
+-          x
+
+-            .replace(/^[wW]\//, "")
+
+-            .replace(/^"/, "")
+
+-            .replace(/"$/, "")
+
+-        );
+
+-      });
+
+-      math_tick = Math.min(...entries);
+
+-    }
+
+-  } else if (math_tick === undefined) {
+
+-    math_tick = -1;
+
+-  }
+
+-  function finishWith304or404() {
+
+-    // Element implicitly has an 'any' type
+
+-    // because expression of type 'any' can't be used to index type '{ } '.ts(7053)
+
+-    // @ts-ignore
+
+-    if (pcaResultsExistForZid[zid]) {
+
+-      res.status(304).end();
+
+-    } else {
+
+-      // Technically, this should probably be a 404, but
+
+-      // the red errors make it hard to see other errors
+
+-      // in Chrome Developer Tools.
+
+-      res.status(304).end();
+
+-      // res.status(404).end();
+
+-    }
+
+-  }
+
+-
+
+-  getPca(zid, math_tick)
+
+-    .then(function (data: PcaCacheItem | undefined) {
+
+-      if (data) {
+
+-        // The buffer is gzipped beforehand to cut down on server effort in re-gzipping the same json string for each response.
+
+-        // We can't cache this endpoint on Cloudflare because the response changes too freqently, so it seems like the best way
+
+-        // is to cache the gzipped json'd buffer here on the server.
+
+-        res.set({
+
+-          "Content-Type": "application/json",
+
+-          "Content-Encoding": "gzip",
+
+-          Etag: '"' + data.asPOJO.math_tick + '"',
+
+-        });
+
+-        res.send(data.asBufferOfGzippedJson);
+
+-      } else {
+
+-        // check whether we should return a 304 or a 404
+
+-        // Element implicitly has an 'any' type
+
+-        // because expression of type 'any' can't be used to index type '{ } '.ts(7053)
+
+-        // @ts-ignore
+
+-        if (pcaResultsExistForZid[zid] === undefined) {
+
+-          // This server doesn't know yet if there are any PCA results in the DB
+
+-          // So try querying from -1
+
+-          return getPca(zid, -1).then(function (data: any) {
+
+-            let exists = !!data;
+
+-            // Element implicitly has an 'any' type
+
+-            // because expression of type 'any' can't be used to index type '{ } '.ts(7053)
+
+-            // @ts-ignore
+
+-            pcaResultsExistForZid[zid] = exists;
+
+-            finishWith304or404();
+
+-          });
+
+-        } else {
+
+-          finishWith304or404();
+
+-        }
+
+-      }
+
+-    })
+
+-    .catch(function (err: any) {
+
+-      fail(res, 500, err);
+
+-    });
+
+-}
+

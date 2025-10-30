@@ -1,0 +1,71 @@
+--- server/src/routes/metadataAnswers.ts
++++ server/src/server.ts
+@@ -1,16 +1,19 @@
+-function deleteMetadataAnswer(
+
+-  pmaid: any,
+
+-  callback: { (err: any): void; (arg0: null): void }
+
+-) {
+
+-  pgQuery(
+
+-    "update participant_metadata_answers set alive = FALSE where pmaid = ($1);",
+
+-    [pmaid],
+
+-    function (err: any) {
+
+-      if (err) {
+
+-        callback(err);
+
+-        return;
+
++  function deleteMetadataAnswer(
+
++    pmaid: any,
+
++    callback: { (err: any): void; (arg0: null): void }
+
++  ) {
+
++    // pgQuery("update participant_metadata_choices set alive = FALSE where pmaid = ($1);", [pmaid], function(err) {
+
++    //     if (err) {callback(34534545); return;}
+
++    pgQuery(
+
++      "update participant_metadata_answers set alive = FALSE where pmaid = ($1);",
+
++      [pmaid],
+
++      function (err: any) {
+
++        if (err) {
+
++          callback(err);
+
++          return;
+
++        }
+
++        callback(null);
+
+       }
+
+-      callback(null);
+
+-    }
+
+-  );
+
+-}
+
++    );
+
++    // });
+
++  }
+

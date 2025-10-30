@@ -1,0 +1,129 @@
+--- server/src/routes/metadataAnswers.ts
++++ server/src/server.ts
+@@ -1,33 +1,43 @@
+-function handle_DELETE_metadata_answers(
+
+-  req: { p: { uid?: any; pmaid: any } },
+
+-  res: { send: (arg0: number) => void }
+
+-) {
+
+-  let uid = req.p.uid;
+
+-  let pmaid = req.p.pmaid;
+
++  function handle_DELETE_metadata_answers(
+
++    req: { p: { uid?: any; pmaid: any } },
+
++    res: { send: (arg0: number) => void }
+
++  ) {
+
++    let uid = req.p.uid;
+
++    let pmaid = req.p.pmaid;
+
+ 
+
+-  getZidForAnswer(pmaid, function (err: any, zid: any) {
+
+-    if (err) {
+
+-      fail(res, 500, "polis_err_delete_participant_metadata_answers_zid", err);
+
+-      return;
+
+-    }
+
+-    Utils.isConversationOwner(zid, uid, function (err: any) {
+
++    getZidForAnswer(pmaid, function (err: any, zid: any) {
+
+       if (err) {
+
+         fail(
+
+           res,
+
+-          403,
+
+-          "polis_err_delete_participant_metadata_answers_auth",
+
++          500,
+
++          "polis_err_delete_participant_metadata_answers_zid",
+
+           err
+
+         );
+
+         return;
+
+       }
+
+-
+
+-      deleteMetadataAnswer(pmaid, function (err: any) {
+
++      isConversationOwner(zid, uid, function (err: any) {
+
+         if (err) {
+
+-          fail(res, 500, "polis_err_delete_participant_metadata_answers", err);
+
++          fail(
+
++            res,
+
++            403,
+
++            "polis_err_delete_participant_metadata_answers_auth",
+
++            err
+
++          );
+
+           return;
+
+         }
+
+-        res.send(200);
+
++
+
++        deleteMetadataAnswer(pmaid, function (err: any) {
+
++          if (err) {
+
++            fail(
+
++              res,
+
++              500,
+
++              "polis_err_delete_participant_metadata_answers",
+
++              err
+
++            );
+
++            return;
+
++          }
+
++          res.send(200);
+
++        });
+
+       });
+
+     });
+
+-  });
+
+-}
+
++  }
+

@@ -1,0 +1,145 @@
+--- server/src/routes/math.ts
++++ server/src/server.ts
+@@ -1,36 +1,36 @@
+-function handle_POST_math_update(
+
+-  req: { p: { zid: any; uid?: any; math_update_type: any } },
+
+-  res: {
+
+-    status: (
+
+-      arg0: number
+
+-    ) => { (): any; new (): any; json: { (arg0: {}): void; new (): any } };
+
++  function handle_POST_math_update(
+
++    req: { p: { zid: any; uid?: any; math_update_type: any } },
+
++    res: {
+
++      status: (
+
++        arg0: number
+
++      ) => { (): any; new (): any; json: { (arg0: {}): void; new (): any } };
+
++    }
+
++  ) {
+
++    let zid = req.p.zid;
+
++    let uid = req.p.uid;
+
++    let math_env = Config.mathEnv;
+
++    let math_update_type = req.p.math_update_type;
+
++
+
++    isModerator(zid, uid).then((hasPermission: any) => {
+
++      if (!hasPermission) {
+
++        return fail(res, 500, "handle_POST_math_update_permission");
+
++      }
+
++      return pgQueryP(
+
++        "insert into worker_tasks (task_type, task_data, task_bucket, math_env) values ('update_math', $1, $2, $3);",
+
++        [
+
++          JSON.stringify({
+
++            zid: zid,
+
++            math_update_type: math_update_type,
+
++          }),
+
++          zid,
+
++          math_env,
+
++        ]
+
++      )
+
++        .then(() => {
+
++          res.status(200).json({});
+
++        })
+
++        .catch((err: any) => {
+
++          return fail(res, 500, "polis_err_POST_math_update", err);
+
++        });
+
++    });
+
+   }
+
+-) {
+
+-  let zid = req.p.zid;
+
+-  let uid = req.p.uid;
+
+-  let math_env = Config.mathEnv;
+
+-  let math_update_type = req.p.math_update_type;
+
+-
+
+-  Utils.isModerator(zid, uid).then((hasPermission: any) => {
+
+-    if (!hasPermission) {
+
+-      return fail(res, 500, "handle_POST_math_update_permission");
+
+-    }
+
+-    return pgQueryP(
+
+-      "insert into worker_tasks (task_type, task_data, task_bucket, math_env) values ('update_math', $1, $2, $3);",
+
+-      [
+
+-        JSON.stringify({
+
+-          zid: zid,
+
+-          math_update_type: math_update_type,
+
+-        }),
+
+-        zid,
+
+-        math_env,
+
+-      ]
+
+-    )
+
+-      .then(() => {
+
+-        res.status(200).json({});
+
+-      })
+
+-      .catch((err: any) => {
+
+-        return fail(res, 500, "polis_err_POST_math_update", err);
+
+-      });
+
+-  });
+
+-}
+

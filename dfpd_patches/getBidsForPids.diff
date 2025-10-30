@@ -1,0 +1,151 @@
+--- server/src/routes/math.ts
++++ server/src/server.ts
+@@ -1,39 +1,39 @@
+-function getBidsForPids(zid: any, math_tick: number, pids: any[]) {
+
+-  let dataPromise = getBidIndexToPidMapping(zid, math_tick);
+
+-  let mathResultsPromise = getPca(zid, math_tick);
+
++  function getBidsForPids(zid: any, math_tick: number, pids: any[]) {
+
++    let dataPromise = getBidIndexToPidMapping(zid, math_tick);
+
++    let mathResultsPromise = getPca(zid, math_tick);
+
+ 
+
+-  return Promise.all([dataPromise, mathResultsPromise]).then(function (
+
+-    items: { asPOJO: any }[]
+
+-  ) {
+
+-    // Property 'bidToPid' does not exist on type '{ asPOJO: any; }'.ts(2339)
+
+-    // @ts-ignore
+
+-    let b2p = items[0].bidToPid || []; // not sure yet if "|| []" is right here.
+
+-    let mathResults = items[1].asPOJO;
+
+-    function findBidForPid(pid: any) {
+
+-      let yourBidi = -1;
+
+-      // if (!b2p) {
+
+-      //     return yourBidi;
+
+-      // }
+
+-      for (var bidi = 0; bidi < b2p.length; bidi++) {
+
+-        let pids = b2p[bidi];
+
+-        if (pids.indexOf(pid) !== -1) {
+
+-          yourBidi = bidi;
+
+-          break;
+
++    return Promise.all([dataPromise, mathResultsPromise]).then(function (
+
++      items: { asPOJO: any }[]
+
++    ) {
+
++      // Property 'bidToPid' does not exist on type '{ asPOJO: any; }'.ts(2339)
+
++      // @ts-ignore
+
++      let b2p = items[0].bidToPid || []; // not sure yet if "|| []" is right here.
+
++      let mathResults = items[1].asPOJO;
+
++      function findBidForPid(pid: any) {
+
++        let yourBidi = -1;
+
++        // if (!b2p) {
+
++        //     return yourBidi;
+
++        // }
+
++        for (var bidi = 0; bidi < b2p.length; bidi++) {
+
++          let pids = b2p[bidi];
+
++          if (pids.indexOf(pid) !== -1) {
+
++            yourBidi = bidi;
+
++            break;
+
++          }
+
+         }
+
++
+
++        let yourBid = indexToBid[yourBidi];
+
++
+
++        if (yourBidi >= 0 && _.isUndefined(yourBid)) {
+
++          logger.error("polis_err_math_index_mapping_mismatch", { pid, b2p });
+
++          yourBid = -1;
+
++        }
+
++        return yourBid;
+
+       }
+
+ 
+
+-      let yourBid = indexToBid[yourBidi];
+
+-
+
+-      if (yourBidi >= 0 && _.isUndefined(yourBid)) {
+
+-        logger.error("polis_err_math_index_mapping_mismatch", { pid, b2p });
+
+-        yourBid = -1;
+
+-      }
+
+-      return yourBid;
+
+-    }
+
+-
+
+-    let indexToBid = mathResults["base-clusters"].id;
+
+-    let bids = pids.map(findBidForPid);
+
+-    let pidToBid = _.object(pids, bids);
+
+-    return pidToBid;
+
+-  });
+
+-}
+
++      let indexToBid = mathResults["base-clusters"].id;
+
++      let bids = pids.map(findBidForPid);
+
++      let pidToBid = _.object(pids, bids);
+
++      return pidToBid;
+
++    });
+
++  }
+

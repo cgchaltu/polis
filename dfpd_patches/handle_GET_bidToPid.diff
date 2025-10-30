@@ -1,0 +1,93 @@
+--- server/src/routes/math.ts
++++ server/src/server.ts
+@@ -1,23 +1,23 @@
+-function handle_GET_bidToPid(
+
+-  req: { p: { zid: any; math_tick: any } },
+
+-  res: {
+
+-    json: (arg0: { bidToPid: any }) => void;
+
+-    status: (
+
+-      arg0: number
+
+-    ) => { (): any; new (): any; end: { (): void; new (): any } };
+
++  function handle_GET_bidToPid(
+
++    req: { p: { zid: any; math_tick: any } },
+
++    res: {
+
++      json: (arg0: { bidToPid: any }) => void;
+
++      status: (
+
++        arg0: number
+
++      ) => { (): any; new (): any; end: { (): void; new (): any } };
+
++    }
+
++  ) {
+
++    let zid = req.p.zid;
+
++    let math_tick = req.p.math_tick;
+
++    getBidIndexToPidMapping(zid, math_tick).then(
+
++      function (doc: { bidToPid: any }) {
+
++        let b2p = doc.bidToPid;
+
++        res.json({
+
++          bidToPid: b2p,
+
++        });
+
++      },
+
++      function (err: any) {
+
++        res.status(304).end();
+
++      }
+
++    );
+
+   }
+
+-) {
+
+-  let zid = req.p.zid;
+
+-  let math_tick = req.p.math_tick;
+
+-  getBidIndexToPidMapping(zid, math_tick).then(
+
+-    function (doc: { bidToPid: any }) {
+
+-      let b2p = doc.bidToPid;
+
+-      res.json({
+
+-        bidToPid: b2p,
+
+-      });
+
+-    },
+
+-    function (err: any) {
+
+-      res.status(304).end();
+
+-    }
+
+-  );
+
+-}
+

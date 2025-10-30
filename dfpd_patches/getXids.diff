@@ -1,0 +1,89 @@
+--- server/src/routes/math.ts
++++ server/src/server.ts
+@@ -1,22 +1,22 @@
+-function getXids(zid: any) {
+
+-  // 'new' expression, whose target lacks a construct signature, implicitly has an 'any' type.ts(7009)
+
+-  // @ts-ignore
+
+-  return new MPromise(
+
+-    "getXids",
+
+-    function (resolve: (arg0: any) => void, reject: (arg0: string) => void) {
+
+-      pgQuery_readOnly(
+
+-        "select pid, xid from xids inner join " +
+
+-          "(select * from participants where zid = ($1)) as p on xids.uid = p.uid " +
+
+-          " where owner in (select org_id from conversations where zid = ($1));",
+
+-        [zid],
+
+-        function (err: any, result: { rows: any }) {
+
+-          if (err) {
+
+-            reject("polis_err_fetching_xids");
+
+-            return;
+
++  function getXids(zid: any) {
+
++    // 'new' expression, whose target lacks a construct signature, implicitly has an 'any' type.ts(7009)
+
++    // @ts-ignore
+
++    return new MPromise(
+
++      "getXids",
+
++      function (resolve: (arg0: any) => void, reject: (arg0: string) => void) {
+
++        pgQuery_readOnly(
+
++          "select pid, xid from xids inner join " +
+
++            "(select * from participants where zid = ($1)) as p on xids.uid = p.uid " +
+
++            " where owner in (select org_id from conversations where zid = ($1));",
+
++          [zid],
+
++          function (err: any, result: { rows: any }) {
+
++            if (err) {
+
++              reject("polis_err_fetching_xids");
+
++              return;
+
++            }
+
++            resolve(result.rows);
+
+           }
+
+-          resolve(result.rows);
+
+-        }
+
+-      );
+
+-    }
+
+-  );
+
+-}
+
++        );
+
++      }
+
++    );
+
++  }
+

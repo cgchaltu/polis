@@ -1,0 +1,133 @@
+--- server/src/routes/math.ts
++++ server/src/server.ts
+@@ -1,33 +1,33 @@
+-function handle_POST_xidWhitelist(
+
+-  req: { p: { xid_whitelist: any; uid?: any } },
+
+-  res: {
+
+-    status: (
+
+-      arg0: number
+
+-    ) => { (): any; new (): any; json: { (arg0: {}): void; new (): any } };
+
++  function handle_POST_xidWhitelist(
+
++    req: { p: { xid_whitelist: any; uid?: any } },
+
++    res: {
+
++      status: (
+
++        arg0: number
+
++      ) => { (): any; new (): any; json: { (arg0: {}): void; new (): any } };
+
++    }
+
++  ) {
+
++    const xid_whitelist = req.p.xid_whitelist;
+
++    const len = xid_whitelist.length;
+
++    const owner = req.p.uid;
+
++    const entries = [];
+
++    try {
+
++      for (var i = 0; i < len; i++) {
+
++        entries.push("(" + escapeLiteral(xid_whitelist[i]) + "," + owner + ")");
+
++      }
+
++    } catch (err) {
+
++      return fail(res, 400, "polis_err_bad_xid", err);
+
++    }
+
++
+
++    pgQueryP(
+
++      "insert into xid_whitelist (xid, owner) values " +
+
++        entries.join(",") +
+
++        " on conflict do nothing;",
+
++      []
+
++    )
+
++      .then((result: any) => {
+
++        res.status(200).json({});
+
++      })
+
++      .catch((err: any) => {
+
++        return fail(res, 500, "polis_err_POST_xidWhitelist", err);
+
++      });
+
+   }
+
+-) {
+
+-  const xid_whitelist = req.p.xid_whitelist;
+
+-  const len = xid_whitelist.length;
+
+-  const owner = req.p.uid;
+
+-  const entries = [];
+
+-  try {
+
+-    for (var i = 0; i < len; i++) {
+
+-      entries.push("(" + Utils.escapeLiteral(xid_whitelist[i]) + "," + owner + ")");
+
+-    }
+
+-  } catch (err) {
+
+-    return fail(res, 400, "polis_err_bad_xid", err);
+
+-  }
+
+-
+
+-  pgQueryP(
+
+-    "insert into xid_whitelist (xid, owner) values " +
+
+-      entries.join(",") +
+
+-      " on conflict do nothing;",
+
+-    []
+
+-  )
+
+-    .then((result: any) => {
+
+-      res.status(200).json({});
+
+-    })
+
+-    .catch((err: any) => {
+
+-      return fail(res, 500, "polis_err_POST_xidWhitelist", err);
+
+-    });
+
+-}
+

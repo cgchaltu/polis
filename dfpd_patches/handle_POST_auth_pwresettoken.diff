@@ -1,0 +1,109 @@
+--- server/src/routes/password.ts
++++ server/src/server.ts
+@@ -1,41 +1,13 @@
+-function handle_POST_auth_pwresettoken(
+
+-  req: { p: { email: any } },
+
+-  res: {
+
+-    status: (
+
+-      arg0: number
+
+-    ) => {
+
+-      (): any;
+
+-      new (): any;
+
+-      json: { (arg0: string): void; new (): any };
+
+-    };
+
+-  }
+
+-) {
+
+-  let email = req.p.email;
+
+-
+
+-  let server = getServerNameWithProtocol(req);
+
+-
+
+-  // let's clear the cookies here, in case something is borked.
+
+-  cookies.clearCookies(req, res);
+
+-
+
+-  function finish() {
+
+-    res.status(200).json("Password reset email sent, please check your email.");
+
+-  }
+
+-
+
+-  getUidByEmail(email).then(
+
+-    function (uid?: any) {
+
+-      setupPwReset(uid, function (err: any, pwresettoken: any) {
+
+-        sendPasswordResetEmail(uid, pwresettoken, server, function (err: any) {
+
+-          if (err) {
+
+-            fail(res, 500, "Error: Couldn't send password reset email.", err);
+
+-            return;
+
+-          }
+
+-          finish();
+
+-        });
+
+-      });
+
+-    },
+
+-    function () {
+
+-      sendPasswordResetEmailFailure(email, server);
+
+-      finish();
+
++  function handle_POST_auth_pwresettoken(
+
++    req: { p: { email: any } },
+
++    res: {
+
++      status: (
+
++        arg0: number
+
++      ) => {
+
++        (): any;
+
++        new (): any;
+
++        json: { (arg0: string): void; new (): any };
+
++      };
+
+     }
+
+-  );
+
+-}
+
++  ) {
+
++    let email = req.p.email;
+

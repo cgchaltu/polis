@@ -1,0 +1,125 @@
+--- server/src/routes/math.ts
++++ server/src/server.ts
+@@ -1,31 +1,31 @@
+-function handle_GET_xids(
+
+-  req: { p: { uid?: any; zid: any } },
+
+-  res: {
+
+-    status: (
+
+-      arg0: number
+
+-    ) => { (): any; new (): any; json: { (arg0: any): void; new (): any } };
+
++  function handle_GET_xids(
+
++    req: { p: { uid?: any; zid: any } },
+
++    res: {
+
++      status: (
+
++        arg0: number
+
++      ) => { (): any; new (): any; json: { (arg0: any): void; new (): any } };
+
++    }
+
++  ) {
+
++    let uid = req.p.uid;
+
++    let zid = req.p.zid;
+
++
+
++    isOwner(zid, uid).then(
+
++      function (owner: any) {
+
++        if (owner) {
+
++          getXids(zid).then(
+
++            function (xids: any) {
+
++              res.status(200).json(xids);
+
++            },
+
++            function (err: any) {
+
++              fail(res, 500, "polis_err_get_xids", err);
+
++            }
+
++          );
+
++        } else {
+
++          fail(res, 403, "polis_err_get_xids_not_authorized");
+
++        }
+
++      },
+
++      function (err: any) {
+
++        fail(res, 500, "polis_err_get_xids", err);
+
++      }
+
++    );
+
+   }
+
+-) {
+
+-  let uid = req.p.uid;
+
+-  let zid = req.p.zid;
+
+-
+
+-  Utils.isOwner(zid, uid).then(
+
+-    function (owner: any) {
+
+-      if (owner) {
+
+-        getXids(zid).then(
+
+-          function (xids: any) {
+
+-            res.status(200).json(xids);
+
+-          },
+
+-          function (err: any) {
+
+-            fail(res, 500, "polis_err_get_xids", err);
+
+-          }
+
+-        );
+
+-      } else {
+
+-        fail(res, 403, "polis_err_get_xids_not_authorized");
+
+-      }
+
+-    },
+
+-    function (err: any) {
+
+-      fail(res, 500, "polis_err_get_xids", err);
+
+-    }
+
+-  );
+
+-}
+

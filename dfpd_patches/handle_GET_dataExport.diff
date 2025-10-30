@@ -1,0 +1,21 @@
+--- server/src/routes/dataExport.ts
++++ server/src/server.ts
+@@ -1,8 +1,7 @@
+-function handle_GET_dataExport(
+
++  function handle_GET_dataExport(
+
+     req: { p: { uid?: any; zid: any; unixTimestamp: number; format: any } },
+
+     res: { json: (arg0: {}) => void }
+
+   ) {
+
+-    const getUserInfoForUid2 = User.getUserInfoForUid2;
+
+     getUserInfoForUid2(req.p.uid)
+
+       .then((user: { email: any }) => {
+
+         return doAddDataExportTask(
+

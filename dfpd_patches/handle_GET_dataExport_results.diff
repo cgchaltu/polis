@@ -1,0 +1,55 @@
+--- server/src/routes/dataExport.ts
++++ server/src/server.ts
+@@ -1,11 +1,16 @@
+   function handle_GET_dataExport_results(
+
+-      req: { p: { filename: string } },
+
+-      res: { redirect: (arg0: any) => void }
+
+-    ) {
+
+-      var url = s3Client.getSignedUrl("getObject", {
+
+-        Bucket: "polis-datadump",
+
+-        Key: Config.mathEnv + "/" + req.p.filename,
+
+-        Expires: 60 * 60 * 24 * 7,
+
+-      });
+
+-      res.redirect(url);
+
+-    }
+
++    req: { p: { filename: string } },
+
++    res: { redirect: (arg0: any) => void }
+
++  ) {
+
++    var url = s3Client.getSignedUrl("getObject", {
+
++      Bucket: "polis-datadump",
+
++      Key: Config.mathEnv + "/" + req.p.filename,
+
++      Expires: 60 * 60 * 24 * 7,
+
++    });
+
++    res.redirect(url);
+
++
+
++    // res.writeHead(302, {
+
++    //   Location: protocol + "://" + req?.headers?.host + path,
+
++    // });
+
++    // return res.end();
+
++  }
+

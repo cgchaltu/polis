@@ -1,0 +1,45 @@
+--- server/src/routes/math.ts
++++ server/src/server.ts
+@@ -1,11 +1,11 @@
+-function handle_GET_math_pca(
+
+-  req: any,
+
+-  res: {
+
+-    status: (
+
+-      arg0: number
+
+-    ) => { (): any; new (): any; end: { (): void; new (): any } };
+
++  function handle_GET_math_pca(
+
++    req: any,
+
++    res: {
+
++      status: (
+
++        arg0: number
+
++      ) => { (): any; new (): any; end: { (): void; new (): any } };
+
++    }
+
++  ) {
+
++    // migrated off this path, old clients were causing timeout issues by polling repeatedly without waiting for a result for a previous poll.
+
++    res.status(304).end();
+
+   }
+
+-) {
+
+-  // migrated off this path, old clients were causing timeout issues by polling repeatedly without waiting for a result for a previous poll.
+
+-  res.status(304).end();
+
+-}
+

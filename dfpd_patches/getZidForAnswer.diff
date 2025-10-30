@@ -1,0 +1,93 @@
+--- server/src/routes/metadataAnswers.ts
++++ server/src/server.ts
+@@ -1,23 +1,23 @@
+-function getZidForAnswer(
+
+-  pmaid: any,
+
+-  callback: {
+
+-    (err: any, zid: any): void;
+
+-    (arg0: string | null, arg1?: undefined): void;
+
++  function getZidForAnswer(
+
++    pmaid: any,
+
++    callback: {
+
++      (err: any, zid: any): void;
+
++      (arg0: string | null, arg1?: undefined): void;
+
++    }
+
++  ) {
+
++    pgQuery(
+
++      "SELECT zid FROM participant_metadata_answers WHERE pmaid = ($1);",
+
++      [pmaid],
+
++      function (err: any, result: { rows: string | any[] }) {
+
++        if (err) {
+
++          callback(err);
+
++          return;
+
++        }
+
++        if (!result.rows || !result.rows.length) {
+
++          callback("polis_err_zid_missing_for_answer");
+
++          return;
+
++        }
+
++        callback(null, result.rows[0].zid);
+
++      }
+
++    );
+
+   }
+
+-) {
+
+-  pgQuery(
+
+-    "SELECT zid FROM participant_metadata_answers WHERE pmaid = ($1);",
+
+-    [pmaid],
+
+-    function (err: any, result: { rows: string | any[] }) {
+
+-      if (err) {
+
+-        callback(err);
+
+-        return;
+
+-      }
+
+-      if (!result.rows || !result.rows.length) {
+
+-        callback("polis_err_zid_missing_for_answer");
+
+-        return;
+
+-      }
+
+-      callback(null, result.rows[0].zid);
+
+-    }
+
+-  );
+
+-}
+
